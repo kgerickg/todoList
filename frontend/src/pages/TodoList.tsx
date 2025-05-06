@@ -30,11 +30,17 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { RootState } from '../store';
-import { Todo } from '../store/slices/todoSlice';
+import { Todo, fetchTodos, updateTodo } from '../store/slices/todoSlice';
 import { showDialog, showSnackbar } from '../store/slices/uiSlice';
 
 const TodoList: React.FC = () => {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    // @ts-ignore
+    dispatch(fetchTodos());
+  }, [dispatch]);
+
   const todos = useSelector((state: RootState) => state.todos.items);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -45,11 +51,11 @@ const TodoList: React.FC = () => {
   // 過濾和搜索邏輯
   const filteredTodos = todos.filter((todo) => {
     const matchesSearch = todo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         todo.description.toLowerCase().includes(searchTerm.toLowerCase());
+      todo.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPriority = filterPriority === 'all' || todo.priority.toString() === filterPriority;
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'completed' ? todo.completed : !todo.completed);
-    
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'completed' ? todo.completed : !todo.completed);
+
     return matchesSearch && matchesPriority && matchesStatus;
   });
 
@@ -69,11 +75,11 @@ const TodoList: React.FC = () => {
   };
 
   const handleEditTodo = (todo: Todo) => {
-    dispatch(showDialog({ type: 'edit' }));
+    dispatch(showDialog({ type: 'edit', data: todo }));
   };
 
   const handleDeleteTodo = (todo: Todo) => {
-    dispatch(showDialog({ type: 'delete' }));
+    dispatch(showDialog({ type: 'delete', data: todo }));
   };
 
   // 優先級顯示邏輯
@@ -147,6 +153,7 @@ const TodoList: React.FC = () => {
             <TableRow>
               <TableCell>狀態</TableCell>
               <TableCell>標題</TableCell>
+              <TableCell>內容</TableCell>
               <TableCell>優先級</TableCell>
               <TableCell>到期日</TableCell>
               <TableCell align="right">操作</TableCell>
@@ -155,43 +162,58 @@ const TodoList: React.FC = () => {
           <TableBody>
             {filteredTodos
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((todo) => (
-                <TableRow key={todo.id}>
-                  <TableCell padding="checkbox">
-                    <IconButton size="small">
-                      {todo.completed ? 
-                        <CheckCircleIcon color="success" /> : 
-                        <UncheckedIcon />
-                      }
-                    </IconButton>
-                  </TableCell>
-                  <TableCell>{todo.title}</TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={`P${todo.priority}`}
-                      color={getPriorityColor(todo.priority)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(todo.dueDate), 'yyyy/MM/dd HH:mm')}
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditTodo(todo)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteTodo(todo)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              .map((todo) => {
+                const handleToggleComplete = () => {
+                  // @ts-ignore
+                  dispatch(updateTodo({ ...todo, completed: !todo.completed }))
+                    .unwrap()
+                    .then(() => {
+                      dispatch(showSnackbar({ message: '狀態已更新', severity: 'success' }));
+                    })
+                    .catch(() => {
+                      dispatch(showSnackbar({ message: '狀態更新失敗', severity: 'error' }));
+                    });
+                };
+
+                return (
+                  <TableRow key={todo.id}>
+                    <TableCell padding="checkbox">
+                      <IconButton size="small" onClick={handleToggleComplete}>
+                        {todo.completed ?
+                          <CheckCircleIcon color="success" /> :
+                          <UncheckedIcon />
+                        }
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>{todo.title}</TableCell>
+                    <TableCell>{todo.description}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={`P${todo.priority}`}
+                        color={getPriorityColor(todo.priority)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(todo.dueDate), 'yyyy/MM/dd HH:mm')}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditTodo(todo)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteTodo(todo)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
         <TablePagination

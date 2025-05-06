@@ -5,6 +5,12 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/list": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.0",
     "@mui/x-date-pickers": "^5.0.20",
@@ -24,6 +30,10 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@types/gapi": "^0.0.47",
+    "@types/gapi.auth2": "^0.0.61",
+    "@types/gapi.client.calendar": "^3.0.12",
+    "@types/google.accounts": "^0.0.15",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.31",
     "@types/react": "^18.2.6",

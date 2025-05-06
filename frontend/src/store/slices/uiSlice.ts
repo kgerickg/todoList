@@ -16,9 +16,12 @@ export interface DialogState {
   data?: Todo | { id: string }; // Allow Todo or just id for delete
 }
 
+export type ThemeMode = 'light' | 'dark';
+
 export interface UIState {
   snackbar: SnackbarState;
   dialog: DialogState;
+  themeMode: ThemeMode; // 新增 themeMode 狀態
 }
 
 const initialState: UIState = {
@@ -32,12 +35,17 @@ const initialState: UIState = {
     open: false,
     data: undefined,
   },
+  themeMode: 'light', // 預設為淺色模式
 };
 
 const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
+    // 切換主題模式的 reducer
+    toggleThemeMode: (state) => {
+      state.themeMode = state.themeMode === 'light' ? 'dark' : 'light';
+    },
     showSnackbar: (
       state,
       action: PayloadAction<{ message: string; severity: AlertColor }>
@@ -65,6 +73,11 @@ const uiSlice = createSlice({
   },
 });
 
-export const { showSnackbar, hideSnackbar, showDialog, hideDialog } =
-  uiSlice.actions;
+export const {
+  showSnackbar,
+  hideSnackbar,
+  showDialog,
+  hideDialog,
+  toggleThemeMode, // 匯出新的 action
+} = uiSlice.actions;
 export default uiSlice.reducer;

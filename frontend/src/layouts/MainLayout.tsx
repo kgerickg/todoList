@@ -17,6 +17,8 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Switch, // 新增 Switch
+  FormControlLabel, // 新增 FormControlLabel
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -24,12 +26,15 @@ import {
   ListAlt,
   Settings,
   ExitToApp,
+  CalendarMonth as CalendarIcon, // Added CalendarIcon
+  Brightness4 as Brightness4Icon, // 新增 Brightness4Icon (深色模式圖示)
+  Brightness7 as Brightness7Icon, // 新增 Brightness7Icon (淺色模式圖示)
 } from '@mui/icons-material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { RootState } from '../store';
 import { signOut as signOutAction } from '../store/slices/authSlice';
-import { showSnackbar } from '../store/slices/uiSlice';
+import { showSnackbar, toggleThemeMode, ThemeMode } from '../store/slices/uiSlice'; // 新增 toggleThemeMode 和 ThemeMode
 
 const drawerWidth = 240;
 
@@ -39,6 +44,7 @@ const MainLayout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { user } = useSelector((state: RootState) => state.auth);
+  const themeMode = useSelector((state: RootState) => state.ui.themeMode as ThemeMode); // 取得目前的主題模式
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,9 +62,9 @@ const MainLayout: React.FC = () => {
     try {
       await signOut(auth);
       dispatch(signOutAction());
-      dispatch(showSnackbar({ 
-        message: '已成功登出', 
-        severity: 'success' 
+      dispatch(showSnackbar({
+        message: '已成功登出',
+        severity: 'success'
       }));
       navigate('/login');
     } catch (error) {
@@ -72,6 +78,7 @@ const MainLayout: React.FC = () => {
   const menuItems = [
     { text: '儀表板', icon: <Dashboard />, path: '/dashboard' },
     { text: '待辦事項', icon: <ListAlt />, path: '/todos' },
+    { text: '日曆', icon: <CalendarIcon />, path: '/calendar' }, // Added Calendar menu item
     { text: '設定', icon: <Settings />, path: '/settings' },
   ];
 
@@ -119,6 +126,19 @@ const MainLayout: React.FC = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             CloudSync Todo
           </Typography>
+          {/* 主題切換開關 */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={themeMode === 'dark'}
+                onChange={() => dispatch(toggleThemeMode())}
+                icon={<Brightness7Icon />}
+                checkedIcon={<Brightness4Icon />}
+              />
+            }
+            label={themeMode === 'dark' ? <Brightness4Icon /> : <Brightness7Icon />}
+            sx={{ mr: 1 }}
+          />
           <IconButton
             onClick={handleMenuOpen}
             size="small"
