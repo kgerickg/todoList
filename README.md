@@ -9,7 +9,6 @@ CloudSync 是一個基於 Spring Boot（後端）、React（前端）、Firebase
 - 到期提醒（含推播）
 - Google 日曆事件同步
 - 跨平台同步（Web/PWA）
-
 ## 技術棧
 - 前端：React, TypeScript, Material-UI, Redux, FullCalendar
 - 後端：Spring Boot, Java, Firebase Admin SDK
